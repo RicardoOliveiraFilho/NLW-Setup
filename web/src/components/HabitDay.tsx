@@ -1,25 +1,31 @@
+import { useState } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import clsx from 'clsx';
 import { ProgressBar } from './ProgressBar';
-import { Checkbox } from './Checkbox';
 import dayjs from 'dayjs';
+import { HabitList } from './HabitList';
 
 interface HabitDayProps {
   date: Date
-  completed?: number
+  defaultCompleted?: number
   amount?: number
 }
 
-export function HabitDay({ date, amount = 0, completed = 0 }: HabitDayProps) {
+export function HabitDay({ date, amount = 0, defaultCompleted = 0 }: HabitDayProps) {
+  const [completed, setCompleted] = useState(defaultCompleted)
+  
   const completedPercentage = amount > 0 ? Math.round((completed / amount) * 100) : 0
-  const styleTitleCheckbox = "font-semibold text-xl text-white leading-tight group-data-[state=checked]:line-through group-data-[state=checked]:text-zinc-400"
 
   const dayAndMonth = dayjs(date).format('DD/MM')
   const dayOfWeek = dayjs(date).format('dddd')
 
+  function handleCompletedChange(completed: number) {
+    setCompleted(completed)
+  }
+
   return (
     <Popover.Root>
-      <Popover.Trigger className={clsx('w-10 h-10 border-2 rounded-lg', {
+      <Popover.Trigger className={clsx('w-10 h-10 border-2 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-violet-700 focus:ring-offset-2 focus:ring-offset-background', {
         'bg-zinc-900 border-zinc-800': completedPercentage === 0,
         'bg-violet-900 border-violet-700': completedPercentage > 0 && completedPercentage < 20,
         'bg-violet-800 border-violet-600': completedPercentage >= 20 && completedPercentage < 40,
@@ -29,32 +35,15 @@ export function HabitDay({ date, amount = 0, completed = 0 }: HabitDayProps) {
       })} />
 
       <Popover.Portal>
-        <Popover.Content className="min-w-[320px] p-6 rounded-2xl bg-zinc-900 flex flex-col">
+        <Popover.Content className="min-w-[320px] p-6 rounded-2xl bg-zinc-900 flex flex-col focus:outline-none focus:ring-2 focus:ring-violet-700 focus:ring-offset-2 focus:ring-offset-background">
           <span className="font-semibold text-zinc-400">{dayOfWeek}</span>
           <span className="mt-1 font-extrabold leading-tight text-3xl">{dayAndMonth}</span>
 
           <ProgressBar progress={completedPercentage} />
 
-          <div className="mt-6 flex flex-col gap-3">
-            <Checkbox
-              title="Beber 2L de água"
-              styleTitle={styleTitleCheckbox}
-            />
-            <Checkbox
-              title="Ir para academia"
-              styleTitle={styleTitleCheckbox}
-            />
-            <Checkbox
-              title="Estudar React"
-              styleTitle={styleTitleCheckbox}
-            />
-            <Checkbox
-              title="Dormir 8 horas"
-              styleTitle={styleTitleCheckbox}
-            />
-          </div>
+          <HabitList date={date} onCompletedChanged={handleCompletedChange} />
 
-          <Popover.Arrow height={8} width={16} className="fill-zinc-900" />
+          <Popover.Arrow height={8} width={16} className="fill-zinc-900 focus:outline-none focus:ring-2 focus:ring-violet-700 focus:ring-offset-2 focus:ring-offset-background" />
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>
